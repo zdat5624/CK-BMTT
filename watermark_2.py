@@ -46,16 +46,6 @@ def psnr(a, b):
         return float('inf')
     return 20 * np.log10(255.0 / np.sqrt(mse))
 
-def ncc(a, b):
-    a = a.astype(np.float32).flatten()
-    b = b.astype(np.float32).flatten()
-    a_mean = a.mean(); b_mean = b.mean()
-    num = np.sum((a - a_mean) * (b - b_mean))
-    den = np.sqrt(np.sum((a - a_mean)**2) * np.sum((b - b_mean)**2))
-    if den == 0:
-        return 0.0
-    return num / den
-
 def nc(wm_original, wm_extracted):
     """
     Tính hệ số tương quan chuẩn hóa (Normalized Correlation - NCC)
@@ -242,14 +232,13 @@ if __name__ == "__main__":
     cv2.imwrite(os.path.join(output_dir, "cover.png"), cover)
     cv2.imwrite(os.path.join(output_dir, "watermarked.png"), watermarked)
 
-    # extract (non-blind; uses original cover and stored meta)
+    # extract (lấy ảnh đã watermark và bị biến dạng ...)
     watermarked = cv2.imread("./input/watermarked_color.png")
     extracted = extract_dwt_dct_svd(cover, watermarked, meta, alpha=alpha)
     cv2.imwrite(os.path.join(output_dir, "extracted.png"), extracted)
 
     # metrics (compare watermark & extracted)
     # print("PSNR cover vs watermarked:", psnr(cover, watermarked))
-    print("NCC watermark vs extracted:", ncc(wm, extracted))
     print(f"NC watermark vs extracted: {nc(wm, extracted)}")
     # SSIM (watermark images)
     try:
