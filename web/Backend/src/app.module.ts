@@ -1,22 +1,24 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
+import { PrismaModule } from './prisma/prisma.module';
+import { ImagesModule } from './images/images.module';
+import { FilesModule } from './files/files.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, '..', 'public'), // Điều chỉnh rootPath
-    // }),
-    // ServeStaticModule.forRoot({
-    //   rootPath: join(__dirname, '..', 'uploads'),
-    //   serveRoot: '/uploads',
-    // }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // Trỏ ra thư mục public ở gốc dự án
+    }),
+    PrismaModule,
     AuthModule,
-    UserModule,
+    ImagesModule,
+    FilesModule,
   ],
 })
 export class AppModule { }

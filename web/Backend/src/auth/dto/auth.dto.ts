@@ -1,10 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString } from 'class-validator'
-import { Role } from 'src/common/enums/role.enum';
+import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator'
+import { IsEmailOrPhone } from 'src/validators/is-email-or-phone.validator';
 
-export class authLoginDto {
-    @IsPhoneNumber('VN')
+
+export class AuthLoginDto {
     @IsNotEmpty()
+    @IsEmailOrPhone()
     username: string;
 
     @IsString()
@@ -13,10 +14,11 @@ export class authLoginDto {
 }
 
 
+
 export class authSignUpDto {
     @IsPhoneNumber('VN')
     @IsNotEmpty()
-    username: string;
+    phoneNumber: string;
 
     @IsNotEmpty()
     password: string;
@@ -28,36 +30,4 @@ export class authSignUpDto {
     @IsEmail()
     @IsNotEmpty()
     email: string;
-}
-export class authChangePasswordDto {
-    @IsNotEmpty()
-    oldPassword: string;
-
-    @IsNotEmpty()
-    newPassword: string;
-}
-
-export class authForgetPasswordDto {
-    @IsEmail()
-    @IsNotEmpty()
-    email: string;
-
-    @IsOptional()
-    @IsString()
-    otp?: string;
-
-    @IsOptional()
-    @IsString()
-    newPassword?: string;
-}
-
-export class authAssignRoleDto {
-    @IsNotEmpty()
-    @Type(() => Number)
-    userId: number;
-
-    @IsNotEmpty()
-    //check role is valid
-    @IsEnum(Role, { message: 'role must be one of manager, staff, customer, barista, baker, stocktaker, cashier' })
-    roleName: string;
 }

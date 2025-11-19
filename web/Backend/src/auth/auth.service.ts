@@ -1,11 +1,10 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { authAssignRoleDto, authChangePasswordDto, authForgetPasswordDto, authLoginDto, authSignUpDto } from './dto';
+import { ForbiddenException, Get, Injectable, UseGuards } from '@nestjs/common';
+import { AuthLoginDto, authSignUpDto } from './dto';
 import * as argon from 'argon2';
 import * as client from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from 'src/common/mail/mail.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -15,28 +14,42 @@ export class AuthService {
         private prisma: PrismaService,
         private jwt: JwtService,
         private config: ConfigService,
-        private mailService: MailService,
     ) { }
-    async login(dto: authLoginDto) {
+
+
+    async login(dto: AuthLoginDto) {
+        const username = dto.username.trim();
+
+        // Xác định username là email hay số điện thoại
+        const isEmail = username.includes('@');
+
         const user = await this.prisma.user.findUnique({
-            where: {
-                phone_number: dto.username,
-            }
-        })
-        if (!user) throw new ForbiddenException("username doesn't exits or password is wrong!")
+            where: isEmail
+                ? { email: username }
+                : { phone_number: username }
+        });
+
+        if (!user) {
+            throw new ForbiddenException("username doesn't exist or password is wrong!");
+        }
+
         const pwMatches = await argon.verify(user.hash, dto.password);
 
-        if (!pwMatches) throw new ForbiddenException("username doesn't exits or password is wrong!")
+        if (!pwMatches) {
+            throw new ForbiddenException("username doesn't exist or password is wrong!");
+        }
 
         return this.signToken(user.id, user.phone_number);
     }
+
+
     async signup(dto: authSignUpDto) {
         const hash = await argon.hash(dto.password);
 
         const user = await this.prisma.user.create(
             {
                 data: {
-                    phone_number: dto.username,
+                    phone_number: dto.phoneNumber,
                     hash: hash,
                     full_name: dto.fullName,
                     email: dto.email,
@@ -54,16 +67,18 @@ export class AuthService {
             });
         return this.signToken(user.id, user.phone_number);
     }
+
     async signToken(userId: number, phone_number: string): Promise<{ access_token: string }> {
         const payload = { sub: userId, phone_number };
         const token = await this.jwt.signAsync(payload, {
-            expiresIn: '15m',
+            expiresIn: '1y',
             secret: this.config.get('JWT_SECRET'),
         })
         return {
             access_token: token,
         }
     }
+
 
 
 }
