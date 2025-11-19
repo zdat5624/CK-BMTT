@@ -30,6 +30,12 @@
 ```bash
 $ npm install
 
+$ python -m venv venv
+
+$ .\venv\Scripts\activate
+
+$ pip install opencv-python numpy PyWavelets
+
 $ docker run --name secure-db -e POSTGRES_USER=root -e POSTGRES_PASSWORD=123456 -e POSTGRES_DB=bmtt_database -p 5444:5432 -d postgres:15
 
 ```

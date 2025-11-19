@@ -36,19 +36,18 @@ model UserDetail {
 }
 
 model Image {
-  id        Int      @id @default(autoincrement())
-  image_name String   // tên ảnh
-  caption   String?   // mô tả
-  points    Int       @default(0)  // số điểm để tải
-  createdAt DateTime  @default(now())
-
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  downloadedBy UserDownloadedImage[]  // ai đã tải ảnh
-
-  @@map("images")
+  id                 Int      @id @default(autoincrement())
+  image_name         String   // Ảnh đã nhúng watermark
+  original_name      String   // Ảnh gốc chưa nhúng
+  metadata_path      String?  // Đường dẫn file metadata (.pkl)
+  caption            String?
+  points             Int      @default(0)
+  createdAt          DateTime @default(now())
+  userId             Int
+  user               User     @relation(fields: [userId], references: [id])
+  downloadedBy       UserDownloadedImage[]
 }
+
 
 // Bảng trung gian Many-to-Many giữa User và Image
 model UserDownloadedImage {

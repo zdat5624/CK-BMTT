@@ -19,9 +19,11 @@ export class ImagesService {
         return this.prisma.image.create({
             data: {
                 image_name: dto.image_name,
+                original_name: dto.original_name,
+                metadata_path: dto.metadata_url,
                 caption: dto.caption,
                 points: dto.points || 0,
-                userId: userId,
+                userId,
             },
         });
     }

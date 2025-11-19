@@ -1,30 +1,31 @@
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import * as fs from 'fs';
 
-export const storageConfig = diskStorage({
-    // 1. Định nghĩa nơi lưu file
-    // Lưu ý: Bạn phải tạo sẵn thư mục này ở gốc dự án (ngang hàng với src)
-    destination: './public/uploads/images',
+// Folder tạm để Multer lưu file upload
+const TMP_UPLOAD_DIR = './public/uploads/tmp';
+if (!fs.existsSync(TMP_UPLOAD_DIR)) fs.mkdirSync(TMP_UPLOAD_DIR, { recursive: true });
 
-    // 2. Logic đổi tên file (để tránh trùng tên)
+// Folder chính
+const FINAL_IMAGE_DIR = './public/uploads/images';
+const META_DIR = './public/uploads/meta';
+const ORIGINAL_DIR = './public/uploads/original';
+[FINAL_IMAGE_DIR, META_DIR, ORIGINAL_DIR].forEach(dir => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+});
+
+export const tmpStorageConfig = diskStorage({
+    destination: TMP_UPLOAD_DIR,
     filename: (req, file, callback) => {
-        // Tạo chuỗi ngẫu nhiên: Thời gian hiện tại + số random
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-
-        // Lấy đuôi file gốc (ví dụ: .jpg, .png)
         const ext = extname(file.originalname);
-
-        // Tên file mới: file-1234567890-555.jpg
         callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
     },
 });
 
-// 3. Bộ lọc chỉ cho phép file ảnh
 export const imageFileFilter = (req, file, callback) => {
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
-        // Nếu không phải ảnh -> Báo lỗi
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
         return callback(new Error('Only image files are allowed!'), false);
     }
-    // Cho phép
     callback(null, true);
 };

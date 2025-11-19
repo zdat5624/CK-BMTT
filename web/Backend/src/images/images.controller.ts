@@ -28,9 +28,10 @@ export class ImagesController {
     @UseGuards(JwtGuard)
     @Post()
     create(
-        @GetUser('id') userId: number, // Lấy ID từ token
+        @GetUser('id') userId: number,
         @Body() createImageDto: CreateImageDto,
     ) {
+        // Nhận 2 URL (image_name và metadata_url) từ client sau khi họ đã upload qua /files/upload
         return this.imagesService.create(userId, createImageDto);
     }
 
