@@ -18,6 +18,10 @@ export class CreateImageDto {
     @IsOptional()
     caption?: string;
 
+    @IsString()
+    @IsOptional()
+    category?: string;
+
     @IsOptional()
     @Type(() => Number)
     @IsInt()

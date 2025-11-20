@@ -9,6 +9,7 @@ interface ImageCandidate {
     image_name: string;
     original_name: string;
     metadata_path: string | null;
+    id: number;
 }
 
 @Injectable()
@@ -51,7 +52,7 @@ export class WatermarkService {
     async verifyImageIntegrity(filePath: string) {
         const allCandidates: ImageCandidate[] = await this.prisma.image.findMany({
             where: { metadata_path: { not: null } }, // chỉ lấy ảnh đã nhúng
-            select: { image_name: true, original_name: true, metadata_path: true },
+            select: { id: true, image_name: true, original_name: true, metadata_path: true, },
         });
 
         for (const c of allCandidates) {
@@ -69,6 +70,7 @@ export class WatermarkService {
                         message: `Ảnh trùng bản quyền (${c.image_name})`,
                         score: result.score,
                         copyrighted_image_name: c.image_name,
+                        copyrighted_image_id: c.id,
                     };
                 }
             } catch {

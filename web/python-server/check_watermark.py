@@ -78,10 +78,10 @@ def check_main(uploaded_img, cover_img, meta, wm_original):
 
     score = nc(wm_original, extracted)
 
-    detected = float(score) > 0.8
+    detected = float(score) > 0.85
 
     print("score: ", score)
-    print("detected (score) > 0.8: ", detected)
+    print("detected (score > 0.85): ", detected)
 
 
     return {

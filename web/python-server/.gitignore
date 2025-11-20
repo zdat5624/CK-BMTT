@@ -1,0 +1,19 @@
+# Python Virtual Environment
+# File này chứa các thư viện và là bản sao của Python, không được commit.
+venv/
+.venv/
+env/
+
+# Python compiled files
+# Các file bytecode được sinh ra khi Python chạy (runtime).
+__pycache__/
+*.pyc
+
+# IDE and OS generated files
+# Các file của hệ điều hành hoặc IDE (ví dụ: Visual Studio Code, PyCharm).
+.DS_Store
+.idea/
+.vscode/
+
+# Log files (nếu server.py có sinh log)
+*.log

@@ -30,4 +30,7 @@ export class authSignUpDto {
     @IsEmail()
     @IsNotEmpty()
     email: string;
+
+    @IsNotEmpty()
+    sex: string;
 }

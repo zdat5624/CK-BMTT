@@ -57,7 +57,7 @@ export class AuthService {
                         // user details default 
                         create: {
                             birthday: new Date('2000-01-01'),
-                            sex: 'other',
+                            sex: dto.sex ? dto.sex : 'other',
                             avatar: 'default.png',
                             address: 'Unknown',
                         }

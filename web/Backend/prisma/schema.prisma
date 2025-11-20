@@ -41,6 +41,7 @@ model Image {
   original_name      String   // Ảnh gốc chưa nhúng
   metadata_path      String?  // Đường dẫn file metadata (.pkl)
   caption            String?
+  category           String?
   points             Int      @default(0)
   createdAt          DateTime @default(now())
   userId             Int
