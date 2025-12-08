@@ -6,7 +6,7 @@ export default function Footer() {
       bg-gray-50/70 backdrop-blur-xl
     ">
             <div className="container mx-auto px-6 py-6 text-center text-gray-600">
-                © {new Date().getFullYear()} Photo Shield — Bảo vệ hình ảnh thông minh.
+                © {new Date().getFullYear()} Photo Shield — Chia sẻ hình ảnh của bạn.
             </div>
         </footer>
     );

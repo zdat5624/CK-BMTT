@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator'
+import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString, Matches } from 'class-validator'
 import { IsEmailOrPhone } from 'src/validators/is-email-or-phone.validator';
 
 
@@ -16,7 +16,9 @@ export class AuthLoginDto {
 
 
 export class authSignUpDto {
-    @IsPhoneNumber('VN')
+    @Matches(/^[0-9]{9,11}$/, {
+        message: 'Số điện thoại không hợp lệ!',
+    })
     @IsNotEmpty()
     phoneNumber: string;
 

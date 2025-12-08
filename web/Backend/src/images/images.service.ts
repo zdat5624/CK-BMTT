@@ -31,13 +31,13 @@ export class ImagesService {
 
     // 2. Lấy danh sách ảnh
     async findAll(dto: PaginationDto) {
-        const { page, size, search, userId, orderBy = "id", orderDirection } = dto;
+        const { page, size, search, userId, orderBy = "id", orderDirection, category } = dto;
 
         // 1. Xây dựng điều kiện lọc (Where)
         const whereCondition: Prisma.ImageWhereInput = {
             // Nếu có userId thì thêm vào điều kiện (AND implicit)
             ...(userId ? { userId: userId } : {}),
-
+            ...(category ? { category: category } : {}),
             // Nếu có từ khóa search thì thêm điều kiện OR
             ...(search ? {
                 OR: [
@@ -108,15 +108,15 @@ export class ImagesService {
 
         if (!image) throw new NotFoundException('Ảnh không tồn tại');
 
-        // 2. Chủ sở hữu thì không trừ điểm
+        // 2. Chủ sở hữu thì không trừ điểm (Logic cũ)
         if (image.userId === userId) {
             return {
                 message: 'Owner tải ảnh — không trừ điểm',
-                downloadUrl: image.original_name,
+                downloadUrl: image.image_name, // Sử dụng image_name để tạo link
             };
         }
 
-        // 3. Kiểm tra user đã tải trước đó chưa
+        // 3. Kiểm tra user đã tải trước đó chưa (Logic cũ)
         const existed = await this.prisma.userDownloadedImage.findUnique({
             where: {
                 userId_imageId: { userId, imageId },
@@ -126,11 +126,11 @@ export class ImagesService {
         if (existed) {
             return {
                 message: 'Bạn đã tải ảnh này trước đó — không trừ điểm nữa',
-                downloadUrl: image.original_name,
+                downloadUrl: image.image_name,
             };
         }
 
-        // 4. Lấy điểm user
+        // 4. Lấy điểm user hiện tại (người tải)
         const userDetail = await this.prisma.userDetail.findUnique({
             where: { userId },
         });
@@ -141,8 +141,11 @@ export class ImagesService {
             throw new BadRequestException('Bạn không đủ điểm để tải ảnh này');
         }
 
-        // 5. Thực hiện trừ điểm và lưu lịch sử vào bảng trung gian
+        // ==========================================================
+        // 5. THỰC HIỆN GIAO DỊCH: TRỪ ĐIỂM NGƯỜI MUA - CỘNG ĐIỂM NGƯỜI BÁN - LƯU LỊCH SỬ
+        // ==========================================================
         await this.prisma.$transaction([
+            // A. Trừ điểm người tải (Downloader)
             this.prisma.userDetail.update({
                 where: { userId },
                 data: {
@@ -150,6 +153,15 @@ export class ImagesService {
                 },
             }),
 
+            // B. Cộng điểm cho chủ sở hữu ảnh (Owner) - LOGIC MỚI THÊM
+            this.prisma.userDetail.update({
+                where: { userId: image.userId }, // ID của chủ ảnh
+                data: {
+                    points: { increment: image.points }, // Cộng thêm số điểm tương ứng
+                },
+            }),
+
+            // C. Lưu lịch sử tải
             this.prisma.userDownloadedImage.create({
                 data: {
                     userId,
@@ -159,9 +171,8 @@ export class ImagesService {
         ]);
 
         return {
-            message: 'Tải ảnh thành công, đã trừ điểm',
+            message: 'Tải ảnh thành công',
             image_name: image.image_name,
-            original_name: image.original_name,
             pointsSpent: image.points,
         };
     }

@@ -6,6 +6,7 @@ import { ImagesModule } from './images/images.module';
 import { FilesModule } from './files/files.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { UserModule } from './user/user.module';
 
 
 
@@ -19,6 +20,7 @@ import { join } from 'path';
     AuthModule,
     ImagesModule,
     FilesModule,
+    UserModule,
   ],
 })
 export class AppModule { }

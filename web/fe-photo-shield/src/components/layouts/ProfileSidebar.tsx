@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { Menu, MenuProps } from 'antd';
-import { UploadOutlined, PictureOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
+import { UploadOutlined, PictureOutlined, UserOutlined, SettingOutlined, ProfileOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -22,10 +22,9 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-    getItem(<Link href="/profile">Thông tin chung</Link>, '/profile', <UserOutlined />),
-    getItem(<Link href="/profile/settings">Cài đặt</Link>, '/profile/settings', <SettingOutlined />),
+    getItem(<Link href="/profile">Thông tin cá nhân</Link>, '/profile', <ProfileOutlined />),
     getItem(<Link href="/profile/upload">Tải ảnh lên</Link>, '/profile/upload', <UploadOutlined />),
-    getItem(<Link href="/profile/my-photos">Ảnh của bạn</Link>, '/profile/my-photos', <PictureOutlined />),
+    getItem(<Link href="/profile/images">Ảnh của bạn</Link>, '/profile/my-photos', <PictureOutlined />),
 ];
 
 export default function ProfileSidebar() {

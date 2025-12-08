@@ -12,3 +12,8 @@ export const IMAGE_CATEGORIES = [
     { value: 'sports', label: 'Thể thao' },
     { value: 'other', label: 'Khác' },
 ];
+
+export const CATEGORIES_FOR_DISCOVERY = [
+    { value: 'all', label: 'Tất cả' },
+    ...IMAGE_CATEGORIES,
+];

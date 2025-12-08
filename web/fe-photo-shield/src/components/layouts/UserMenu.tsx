@@ -9,12 +9,14 @@ import {
     LogoutOutlined,
     ProfileOutlined,
     FireOutlined,
+    PictureOutlined,
+    UploadOutlined,
 } from '@ant-design/icons';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { authService } from '@/services';
 
 const { Text } = Typography;
-
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 export default function UserMenu() {
     const { user, loading } = useAuthContext();
 
@@ -29,7 +31,8 @@ export default function UserMenu() {
 
     if (!user) return null;
 
-    const avatarUrl = user.avatar || user.detail.avatar;
+    const avatar = user.avatar || user.detail.avatar;
+    const avatarUrl = `${BASE_URL}/${avatar}`;
     const userPoints = user.detail.points;
 
     const menuItems: MenuProps['items'] = [
@@ -45,8 +48,18 @@ export default function UserMenu() {
         },
         {
             key: 'profile',
-            label: <Link href="/profile/images">Ảnh tải lên</Link>,
+            label: <Link href="/profile">Thông tin cá nhân</Link>,
             icon: <ProfileOutlined />,
+        },
+        {
+            key: 'upload',
+            label: <Link href="/profile/upload">Tải ảnh lên</Link>,
+            icon: <UploadOutlined />,
+        },
+        {
+            key: 'images',
+            label: <Link href="/profile/images">Ảnh của bạn</Link>,
+            icon: <PictureOutlined />,
         },
         { type: 'divider' as const },
         {
@@ -87,8 +100,9 @@ export default function UserMenu() {
                     size="default"
                     icon={<UserOutlined />}
                     alt={user.full_name}
-                    className="shadow-md"
+                    className="rounded-full !overflow-hidden border border-gray-800 shadow cursor-pointer"
                 />
+
             </div>
         </Dropdown>
     );

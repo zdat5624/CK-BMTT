@@ -3,13 +3,13 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Upload, Form, Input, Select, Button, message, Typography, Divider, Alert, Card, Image, Spin } from 'antd';
-import { UploadOutlined, InfoCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, PictureOutlined } from '@ant-design/icons';
+import { UploadOutlined, InfoCircleOutlined, CheckCircleOutlined, CloseCircleOutlined, PictureOutlined, InboxOutlined } from '@ant-design/icons';
 import { fileService, CheckImageResponse, UploadImageResponse } from '@/services';
 import { imageService, CreateImagePayload } from '@/services';
 import { IMAGE_CATEGORIES } from '@/lib/constant/category.constant';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import ImageCheckModal from '@/components/ImageCheckModal'; // 💡 IMPORT MODAL
+import ImageCheckModal from '@/components/ImageCheckModal';
 import { LoadingDots } from '@/components/LoadingDots';
 
 const { Dragger } = Upload;
@@ -92,11 +92,7 @@ export default function UploadPage() {
         } catch (error: any) {
             if (axios.isAxiosError(error) && error.response?.status === 400 && error.response.data) {
                 const responseData = error.response.data as CheckImageResponse;
-                setCheckResult({
-                    status: 'unsafe',
-                    message: responseData.message || 'Ảnh bị trùng bản quyền.',
-                    copyrighted_image_name: responseData.copyrighted_image_name
-                });
+                setCheckResult(responseData);
                 message.error('Ảnh bị trùng bản quyền và không thể chia sẻ.');
             } else {
                 message.error(error.response?.data?.message || 'Lỗi kết nối khi kiểm tra bản quyền.');
@@ -134,7 +130,7 @@ export default function UploadPage() {
             };
 
             await imageService.create(createPayload);
-            message.success('🎉 Ảnh đã được chia sẻ và bảo vệ bản quyền thành công!');
+            message.success('Ảnh đã được chia sẻ và bảo vệ bản quyền thành công!');
 
             resetState();
             message.info('Bạn có thể tải lên ảnh khác ngay bây giờ.');
@@ -185,7 +181,7 @@ export default function UploadPage() {
                 // 💡 FIX 2: Hiển thị nút/text để mở Modal xem chi tiết
                 return (
                     <Alert
-                        message="Bản quyền Ảnh không hợp lệ"
+                        message="Bản quyền ảnh không hợp lệ"
                         type="error"
                         showIcon
                         icon={<CloseCircleOutlined />}
@@ -222,9 +218,9 @@ export default function UploadPage() {
                 layout="vertical"
                 onFinish={handleSubmit}
                 className="space-y-6"
-                initialValues={{ points: 100, category: 'other' }}
+                initialValues={{ points: 0, category: 'other' }}
             >
-                <h3 className="text-xl font-semibold mb-4 text-blue-700">Chia sẻ Ảnh Mới</h3>
+                <h1 className="text-xl font-semibold mb-4 text-blue-700">Chia sẻ Ảnh Mới</h1>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -243,7 +239,7 @@ export default function UploadPage() {
                                 fileList={file ? [{ uid: file.name, name: file.name, status: 'done' }] : []}
                             >
                                 <p className="ant-upload-drag-icon">
-                                    <UploadOutlined />
+                                    <InboxOutlined />
                                 </p>
                                 <p className="ant-upload-text">Kéo thả hoặc Nhấp để chọn ảnh</p>
                                 <p className="ant-upload-hint">Chỉ chấp nhận một ảnh duy nhất cho mỗi lần chia sẻ.</p>
@@ -305,7 +301,7 @@ export default function UploadPage() {
                                 tooltip="Số điểm này người dùng khác phải trả khi tải về ảnh của bạn."
                                 rules={[
                                     { required: true, message: "Vui lòng nhập điểm!" },
-                                    { type: 'number', min: 0, max: 1000, message: "Điểm phải từ 0 đến 1.0000.000" }
+                                    { type: 'number', min: 0, max: 1000000, message: "Điểm phải từ 0 đến 1.0000.000" }
                                 ]}
                                 getValueFromEvent={(e) => {
                                     const value = e.target.value;
@@ -313,7 +309,7 @@ export default function UploadPage() {
                                 }}
                                 className="!mb-0"
                             >
-                                <Input type="number" placeholder="Mức phí (Tối thiểu 10)" min={0} max={1000} />
+                                <Input type="number" defaultValue={0} placeholder="Mức phí (Tối thiểu 0)" min={0} max={1000000} />
                             </Form.Item>
                         </Card>
 
@@ -324,11 +320,11 @@ export default function UploadPage() {
                             bordered={false}
                             bodyStyle={{ padding: 0 }}
                         >
-                            {(previewUrl || isChecking) ? (
+                            {(previewUrl && (isChecking || checkResult?.status === "safe")) ? (
                                 <div className="relative flex items-center justify-center p-2 bg-gray-100">
                                     {isChecking && (
                                         <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-10">
-                                            <Spin tip="Đang kiểm tra..." size="large" />
+                                            <Spin tip="Đang kiểm tra..." size="small" />
                                         </div>
                                     )}
                                     <Image
@@ -337,6 +333,7 @@ export default function UploadPage() {
                                         style={{ maxHeight: 250, objectFit: 'contain', width: '100%' }}
                                         preview={false}
                                     />
+
                                 </div>
                             ) : (
                                 <div className="h-40 flex flex-col items-center justify-center text-gray-500">

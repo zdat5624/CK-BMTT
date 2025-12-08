@@ -4,7 +4,6 @@ export const GetUser = createParamDecorator(
     (data: string | undefined, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest();
 
-        // LOGIC QUAN TRỌNG:
         // Nếu trong Controller gọi @GetUser('id') -> data = 'id'
         // Lúc này code sẽ trả về request.user['id'] (là số 1)
         if (data) {

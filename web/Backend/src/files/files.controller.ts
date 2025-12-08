@@ -1,6 +1,6 @@
 import { Controller, Post, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { tmpStorageConfig, imageFileFilter } from './multer.config';
+import { tmpStorageConfig, imageFileFilter } from '../configs/multer.config';
 import { WatermarkService } from './watermark.service';
 import * as fs from 'fs';
 import * as path from 'path';

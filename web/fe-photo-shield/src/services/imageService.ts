@@ -7,19 +7,24 @@ import { TIME_OUT_API_FILE } from "./fileService";
 
 export interface ImageItem {
     id: number;
+
     image_name: string;
     original_name: string;
     metadata_path: string | null;
+
     caption?: string;
     category?: string;
     points: number;
     createdAt: string;
     userId: number;
 
+    downloadedBy?: any[];
+
     user?: {
         id: number;
         full_name: string;
         phone_number: string;
+        email: string;
         detail?: {
             avatar: string;
             points: number;
@@ -64,6 +69,7 @@ export interface ImageQueryParams {
     page?: number;
     size?: number;
     search?: string;
+    category?: string;
     userId?: number;
     orderBy?: string;
     orderDirection?: "asc" | "desc";

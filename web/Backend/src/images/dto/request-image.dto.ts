@@ -21,6 +21,9 @@ export class PaginationDto {
     search?: string;
 
     @IsOptional()
+    category?: string;
+
+    @IsOptional()
     @IsInt()
     @Type(() => Number)
     userId?: number;
