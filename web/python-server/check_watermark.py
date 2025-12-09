@@ -2,16 +2,13 @@ import cv2
 import numpy as np
 import pywt
 
-
 def dct2(block):
     return cv2.dct(block)
 
-
 def extract_dwt_dct_svd(cover_color, wm_color, meta, alpha=0.44):
     wavelet = meta['wavelet']
-    Uw = meta['Uw']
-    Vw = meta['Vw']
-    Sc = meta['Sc']
+    Uw = meta['Uw'] # Đây là ma trận đã cắt gọn (N x k)
+    Vw = meta['Vw'] # Đây là ma trận đã cắt gọn (k x N)
 
     # Resize nếu hình không bằng nhau
     if cover_color.shape != wm_color.shape:
@@ -36,11 +33,16 @@ def extract_dwt_dct_svd(cover_color, wm_color, meta, alpha=0.44):
     Sc_c = np.linalg.svd(dct_LL_c, full_matrices=False)[1]
     Sc_m = np.linalg.svd(dct_LL_m, full_matrices=False)[1]
 
-    k = min(len(Sc_c), len(Sc), Uw.shape[1])
+    # Vì Uw trong meta đã được cắt sẵn theo k (ví dụ k=30), ta lấy k từ shape của Uw
+    k = Uw.shape[1] 
+
+    # Đảm bảo không vượt quá kích thước thực tế (phòng trường hợp ảnh quá nhỏ)
+    k = min(k, len(Sc_c), len(Sc_m))
 
     # Khôi phục singular values watermark
     Sw_rec = (Sc_m[:k] - Sc_c[:k]) / alpha
 
+    # Tái tạo watermark: Uw(Nxk) * diag(kxk) * Vw(kxN) -> Kết quả (NxN)
     wm_rec = Uw[:, :k] @ np.diag(Sw_rec) @ Vw[:k, :]
 
     # Chuẩn hóa về 0–255
@@ -58,9 +60,9 @@ def extract_dwt_dct_svd(cover_color, wm_color, meta, alpha=0.44):
 
     return wm_out
 
-
+#  hàm tính NC
 def nc(original, extract):
-    # Resize nếu cần
+    # Resize
     if original.shape != extract.shape:
         extract = cv2.resize(extract, (original.shape[1], original.shape[0]))
 
@@ -72,17 +74,17 @@ def nc(original, extract):
 
     return np.dot(a, b) / np.sqrt(np.dot(a, a) * np.dot(b, b) + 1e-9)
 
-
+# Giữ nguyên wrapper main để server gọi
 def check_main(uploaded_img, cover_img, meta, wm_original):
     extracted = extract_dwt_dct_svd(cover_img, uploaded_img, meta)
 
     score = nc(wm_original, extracted)
 
+    # Ngưỡng phát hiện, có thể điều chỉnh (thường > 0.6 là khá chắc chắn)
     detected = float(score) > 0.85
 
     print("score: ", score)
     print("detected (score > 0.85): ", detected)
-
 
     return {
         "score": float(score),
