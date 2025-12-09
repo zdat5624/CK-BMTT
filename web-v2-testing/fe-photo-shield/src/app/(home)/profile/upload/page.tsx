@@ -236,7 +236,7 @@ export default function UploadPage() {
                                 maxCount={1}
                                 disabled={isChecking || isUploading}
                                 className={checkResult?.status === 'unsafe' ? 'border-red-500' : ''}
-                                fileList={file ? [{ uid: file.name, name: file.name, status: 'done' }] : []}
+                                fileList={file ? [{ uid: file.name, name: file.name, status: 'done', }] : []}
                             >
                                 <p className="ant-upload-drag-icon">
                                     <InboxOutlined />
@@ -347,12 +347,13 @@ export default function UploadPage() {
 
                     </div>
                 </div>
-            </Form>
+            </Form >
 
             {/* 💡 MODAL XEM CHI TIẾT */}
-            <ImageCheckModal
+            < ImageCheckModal
                 visible={isModalVisible}
-                onClose={() => setIsModalVisible(false)}
+                onClose={() => setIsModalVisible(false)
+                }
                 data={checkResult}
             />
         </>
