@@ -38,7 +38,7 @@ interface ImageDetailModalProps {
 
 const ImageDetailModal: React.FC<ImageDetailModalProps> = ({ visible, onClose, imageId }) => {
     const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || '';
-    const { isAuthenticated } = useAuthContext();
+    const { isAuthenticated, refreshUser } = useAuthContext();
     const router = useRouter();
     // State lưu chi tiết ảnh lấy từ API
     const [image, setImage] = useState<ImageItem | null>(null);
@@ -149,6 +149,7 @@ const ImageDetailModal: React.FC<ImageDetailModalProps> = ({ visible, onClose, i
             message.success(response.message || 'Tải ảnh thành công!');
 
             // Refetch lại để cập nhật số lượt tải mới ngay lập tức
+            refreshUser();
             fetchImageDetail(image.id, true);
 
         } catch (error: any) {

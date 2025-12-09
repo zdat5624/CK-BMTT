@@ -133,7 +133,7 @@ export default function UploadPage() {
             message.success('Ảnh đã được chia sẻ và bảo vệ bản quyền thành công!');
 
             resetState();
-            message.info('Bạn có thể tải lên ảnh khác ngay bây giờ.');
+            // message.info('Bạn có thể tải lên ảnh khác ngay bây giờ.');
 
         } catch (error: any) {
             message.error(error.response?.data?.message || 'Chia sẻ ảnh thất bại. Vui lòng thử lại.');

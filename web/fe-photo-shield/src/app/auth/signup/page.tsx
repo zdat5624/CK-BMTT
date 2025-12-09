@@ -7,6 +7,7 @@ import Link from "next/link";
 // Chỉ cần import SignupPayload từ services
 import { authService, SignupPayload } from "@/services";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 const { Option } = Select;
 
@@ -18,6 +19,7 @@ interface SignupFormData extends SignupPayload {
 
 export default function SignupPage() {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     // SỬ DỤNG SignupFormData CHO VALUES
     const onFinish = async (values: SignupFormData) => {
@@ -25,13 +27,19 @@ export default function SignupPage() {
         const { confirmPassword, ...signupPayload } = values;
 
         try {
+            setLoading(true);
+
             // Ép kiểu signupPayload thành SignupPayload khi gọi service (đảm bảo đúng kiểu API)
             await authService.signup(signupPayload as SignupPayload);
+            setLoading(false);
+
             message.success("Đăng ký thành công!");
             // router.push("/");
             window.location.href = "/";
         } catch (error: any) {
             message.error(error.response?.data?.message || "Đăng ký thất bại!");
+            setLoading(false);
+
         }
     };
 
@@ -164,6 +172,8 @@ export default function SignupPage() {
                     </Form.Item>
 
                     <Button
+                        loading={loading}
+
                         type="primary"
                         htmlType="submit"
                         size="large"

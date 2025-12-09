@@ -34,7 +34,7 @@ def extract_dwt_dct_svd(cover_color, wm_color, meta, alpha=0.44):
     Sc_m = np.linalg.svd(dct_LL_m, full_matrices=False)[1]
 
     # Vì Uw trong meta đã được cắt sẵn theo k (ví dụ k=30), ta lấy k từ shape của Uw
-    k = Uw.shape[1] 
+    k = Uw.shape[1]
 
     # Đảm bảo không vượt quá kích thước thực tế (phòng trường hợp ảnh quá nhỏ)
     k = min(k, len(Sc_c), len(Sc_m))
@@ -74,19 +74,40 @@ def nc(original, extract):
 
     return np.dot(a, b) / np.sqrt(np.dot(a, a) * np.dot(b, b) + 1e-9)
 
-# Giữ nguyên wrapper main để server gọi
+
+
 def check_main(uploaded_img, cover_img, meta, wm_original):
-    extracted = extract_dwt_dct_svd(cover_img, uploaded_img, meta)
+    try:
+        # --- 1. KIỂM TRA SƠ BỘ ---
+        h, w = cover_img.shape[:2]
+        uploaded_resized = cv2.resize(uploaded_img, (w, h))
+        correlation = nc(cover_img, uploaded_resized)
 
-    score = nc(wm_original, extracted)
+        if correlation < 0.55:
+            # print("The uploaded photo is not the same as the original photo.")
+            return {
+                "score": 0.0,
+                "detected": False,
+                "reason": "Image mismatch (Wrong image)"
+            }
 
-    # Ngưỡng phát hiện, có thể điều chỉnh (thường > 0.6 là khá chắc chắn)
-    detected = float(score) > 0.85
+        # --- 2. TRÍCH XUẤT  ---
+        extracted = extract_dwt_dct_svd(cover_img, uploaded_img, meta)
+        score = nc(wm_original, extracted)
+        detected = float(score) > 0.85
 
-    print("score: ", score)
-    print("detected (score > 0.85): ", detected)
+        return {
+            "score": float(score),
+            "detected": bool(detected),
+            "reason": "Success"
+        }
 
-    return {
-        "score": float(score),
-        "detected": bool(detected)
-    }
+    except Exception as e:
+        # --- KHI CÓ LỖI (CRASH) ---
+        # print("Check algorithm error:", str(e))
+
+        return {
+            "score": 0.0,
+            "detected": False,
+            "reason": f"System Error: {str(e)}"
+        }

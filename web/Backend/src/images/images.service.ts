@@ -208,8 +208,15 @@ export class ImagesService {
             throw new ForbiddenException('Bạn không có quyền xóa ảnh này');
         }
 
-        // Prisma sẽ tự xóa bảng trung gian nhờ onDelete cascade
-        await this.prisma.image.delete({ where: { id } });
+        // Dùng transaction để xóa dữ liệu liên quan trước
+        await this.prisma.$transaction([
+            // 1. Xóa lịch sử tải xuống
+            this.prisma.userDownloadedImage.deleteMany({
+                where: { imageId: id }
+            }),
+            // 2. Xóa ảnh
+            this.prisma.image.delete({ where: { id } })
+        ]);
 
         return { message: 'Xóa ảnh thành công' };
     }

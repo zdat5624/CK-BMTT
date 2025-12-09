@@ -10,7 +10,7 @@ def dct2(block):
 def idct2(block):
     return cv2.idct(block)
 
-# Tối ưu: thêm tham số k_embed=30
+
 def embed_dwt_dct_svd(cover_color, watermark, alpha=0.44, wavelet='haar', k_embed=30):
     # BGR → YCrCb
     ycrcb = cv2.cvtColor(cover_color, cv2.COLOR_BGR2YCrCb)
@@ -52,7 +52,7 @@ def embed_dwt_dct_svd(cover_color, watermark, alpha=0.44, wavelet='haar', k_embe
     watermarked = cv2.merge((y_wm, cr, cb))
     watermarked = cv2.cvtColor(watermarked, cv2.COLOR_YCrCb2BGR)
 
-    # Tối ưu: Cắt gọt metadata, chỉ lưu k dòng/cột quan trọng -> File .pkl siêu nhẹ
+
     meta = {
         'wavelet': wavelet,
         'Uw': Uw[:, :k],   # Chỉ lưu 30 cột
@@ -63,9 +63,8 @@ def embed_dwt_dct_svd(cover_color, watermark, alpha=0.44, wavelet='haar', k_embe
 
     return watermarked, meta
 
-# Giữ nguyên cấu trúc hàm main để server.py gọi không bị lỗi
 def embed_main(cover_img, wm_img, out_img_path, out_meta_path, alpha=0.44):
-    # Gọi hàm embed đã tối ưu bên trên
+    # Gọi hàm embed
     watermarked, meta = embed_dwt_dct_svd(cover_img, wm_img, alpha)
 
     img_dir = os.path.dirname(out_img_path)

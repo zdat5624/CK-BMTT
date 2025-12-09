@@ -14,6 +14,7 @@ interface AuthContextType {
     isAuthenticated: boolean;
     setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
     loading: boolean;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -22,6 +23,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState<UserLoginInfo | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+    const refreshUser = async () => {
+        try {
+            const res = await authService.getUserLoginInfo();
+            if (res) {
+                setUser(res);
+                localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(res));
+                setIsAuthenticated(true);
+            }
+        } catch (err) {
+            console.error("Failed to refresh user", err);
+            authService.logout();
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
@@ -73,7 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // }
 
     return (
-        <AuthContext.Provider value={{ user, setUser, isAuthenticated, setIsAuthenticated, loading }}>
+        <AuthContext.Provider value={{ user, setUser, isAuthenticated, setIsAuthenticated, loading, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

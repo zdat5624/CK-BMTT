@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id           Int      @id @default(autoincrement())
+  phone_number String   @unique
+  email        String   @unique
+  hash         String
+  full_name    String   @default("empty")
+  role         String   @default("user")
+  detail       UserDetail?
+  images       Image[]       // ảnh do user upload
+  downloaded   UserDownloadedImage[]  // ảnh đã tải
+
+  @@map("users")
+}
+
+model UserDetail {
+  id         Int      @id @default(autoincrement())
+  birthday   DateTime
+  sex        String
+  avatar     String
+  address    String
+  points     Int      @default(0)
+  userId     Int      @unique
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@map("user_details")
+}
+
+model Image {
+  id                 Int      @id @default(autoincrement())
+  image_name         String   // Ảnh đã nhúng watermark
+  original_name      String   // Ảnh gốc chưa nhúng
+  metadata_path      String?  // Đường dẫn file metadata (.pkl)
+  caption            String?
+  category           String?
+  points             Int      @default(0)
+  createdAt          DateTime @default(now())
+  userId             Int
+  user               User     @relation(fields: [userId], references: [id])
+  downloadedBy       UserDownloadedImage[]
+}
+
+
+// Bảng trung gian Many-to-Many giữa User và Image
+model UserDownloadedImage {
+  id      Int    @id @default(autoincrement())
+  userId  Int
+  user    User   @relation(fields: [userId], references: [id])
+  imageId Int
+  image   Image  @relation(fields: [imageId], references: [id])
+  downloadedAt DateTime @default(now())
+
+  @@unique([userId, imageId])  // đảm bảo 1 user chỉ trừ điểm 1 lần cho mỗi ảnh
+  @@map("user_downloaded_images")
+}

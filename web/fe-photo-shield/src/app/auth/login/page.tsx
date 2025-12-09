@@ -6,20 +6,25 @@ import { ArrowLeftOutlined, LockOutlined, UserOutlined } from "@ant-design/icons
 import Link from "next/link";
 import { authService, LoginPayload } from "@/services";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function LoginPage() {
     const router = useRouter();
+    const [loading, setLoading] = useState(false);
 
     const onFinish = async (values: LoginPayload) => {
         try {
+            setLoading(true);
             await authService.login(values);
             message.success("Đăng nhập thành công!");
-
+            setLoading(false);
             // 💡 CẬP NHẬT: Buộc tải lại trang để AuthContext và Header cập nhật
             window.location.href = "/";
 
         } catch (error: any) {
             message.error(error.response?.data?.message || "Đăng nhập thất bại!");
+            setLoading(false);
+
         }
     };
 
@@ -78,6 +83,8 @@ export default function LoginPage() {
                     </Form.Item>
 
                     <Button
+                        loading={loading}
+
                         type="primary"
                         htmlType="submit"
                         size="large"
